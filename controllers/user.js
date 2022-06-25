@@ -1,7 +1,9 @@
 const protectedRoute=require('../middleware/protectRoute'),
     User=require('../models/user'),
     Address=require('../models/userAddress'),
-    AccessToken=require('../models/accesstoken')
+    AccessToken=require('../models/accesstoken'),
+    jwt=require('jsonwebtoken'),
+    jwtkey=process.env.jwtkey
 
 exports.registerController=(req,res)=>{
     const {username,password,name,confirm_pass} =req.body
@@ -12,16 +14,22 @@ exports.registerController=(req,res)=>{
     })
 
 }
-
+console.log(jwtkey)
 exports.loginController=(req,res)=>{
     const {username,password}=req.body
     User.login(username,password,(user,err)=>{
         //console.log(err)
         if(err){return res.status(500).json({"error":err})}
-        AccessToken.getAccessToken(user,(token,err)=>{
-            if(err){return res.status(500).json({"error":err})}
-            return res.json({"accessToken":token})
-        })
+        // AccessToken.getAccessToken(user,(token,err)=>{
+        //     if(err){return res.status(500).json({"error":err})}
+        //     return res.json({"accessToken":token})
+        // })
+        const userData={"username":user.username,"id":user._id}
+        const token =jwt.sign({
+            exp: Math.floor(Date.now() / 1000) + (60 * 60),
+            data: userData
+          }, jwtkey);
+          return res.json({"accessToken":token})
         
     })
 }

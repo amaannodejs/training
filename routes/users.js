@@ -19,7 +19,7 @@ router.post('/address',protectedRoute,userController.addressController) //protec
 
 //get
 
-router.get('/list/:page',userController.listController) //protected
+router.get('/list/:page',protectedRoute,userController.listController) //protected
 
 
 
