@@ -1,7 +1,6 @@
 const protectedRoute=require('../middleware/protectRoute'),
     User=require('../models/user'),
     Address=require('../models/userAddress'),
-    AccessToken=require('../models/accesstoken'),
     jwt=require('jsonwebtoken'),
     jwtkey=process.env.jwtkey
 
@@ -35,22 +34,25 @@ exports.loginController=(req,res)=>{
 }
 exports.addressController=(req,res)=>{
     
-    if((req.body.address.length == 0)||!req.body.city||!req.body.state||!req.body.pincode||!req.body.phoneno){
+    if(!req.body.address||!req.body.city||!req.body.state||!req.body.pincode||!req.body.phoneno){
         return res.status(500).json({"error":"field required"})
     }
-    
-    Address.findOne({"_id":req.user.address}).then(address=>{
-        
-        address.address=req.body.address
-        address.city=req.body.city
-        address.state=req.body.state
-        address.pincode=req.body.pincode
-        address.phoneno=req.body.phoneno
-        address.save().then(address=>{
+    const {address,city,state,pincode,phoneno}=req.body,
+    newAddress=new Address({
+       "address":address,
+       "city":city,
+       "state":state,
+       "pincode":pincode,
+       "phonene":phoneno
+    })
+    newAddress.save().then(address=>{
+        req.user.address.push(address._id)
+        console.log(req.user)
+        req.user.save().then(user=>{
+            //console.log(user)
             return res.sendStatus(200)
         }).catch(err=>console.log(err))
-        
-    }).catch(err=>console.log(err))
+    }).catch(err=>console.log)
     
 
 }
@@ -59,7 +61,7 @@ exports.listController=(req,res)=>{
     const perpage=10,
         pagenum=Number(req.params.page)
     User.find().limit(perpage ).skip(pagenum > 0 ? ( ( pagenum - 1 ) * perpage ) : 0).populate("address").exec().then(users=>{
-        console.log(req.headers["key"])
+        
         return res.json(users)
         
     }).catch(err=>console.log(err))

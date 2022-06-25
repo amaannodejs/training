@@ -18,11 +18,10 @@ const userSchema= new Schema({
         type:String,
         required:true
     },
-    address:{
+    address:[{
         type:Schema.Types.ObjectId,
-        ref:"userAddress",
-        required:true
-    },
+        ref:"userAddress"
+    }],
     
 });
 
@@ -36,18 +35,15 @@ this.findOne({"username":username}).then(user=>{
         if(user){return cb(null,"Username already exist")}
         bcrypt.hash(password,12).then(hash=>{
             password=hash
-            const newAddress=new Address({"address":[],"city":"","state":"","pincode":"","phoneno":""})
-            newAddress.save().then(address=>{
-                const newUser= new this({
-                    "name":name,
-                    "username":username,
-                    "password":password,
-                    "address":address
-                })
-                newUser.save().then(user=>{
-                    if(!user){return cb(null,"DB error")}
-                    return cb(user)
-                }).catch(err=>console.log(err))
+            const newUser= new this({
+                "name":name,
+                "username":username,
+                "password":password,
+                "address":[]
+            })
+            newUser.save().then(user=>{
+                if(!user){return cb(null,"DB error")}
+                return cb(user)
             }).catch(err=>console.log(err))
         }).catch(err=>console.log(err))
        

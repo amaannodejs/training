@@ -3,10 +3,10 @@ const mongoose = require('mongoose'),
 
 const userAddress= new Schema({
    
-    address:[{
+    address:{
         type:String,
         
-    }],
+    },
     city:{
         type:String,
         

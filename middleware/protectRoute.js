@@ -14,7 +14,7 @@ const protectRoute =(req,res,next)=>{
         User.findOne({"_id":decode.data.id}).then(user=>{
             if(!user){return res.status(500).json({"error":'DB error'})}
             req.user=user
-            console.log(user)
+           // console.log(user)
             return next()
         }).catch(err=>console.log(err))
 
