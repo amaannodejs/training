@@ -1,19 +1,32 @@
 {
-  "name": "project4",
+  "name": "project2re",
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js",
+    "start-server": "node app.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://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@github.com/amaannodejs/training.git"
+    "url": "git+https://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@github.com/amaannodejs/test.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/amaannodejs/training/issues"
+    "url": "https://github.com/amaannodejs/test/issues"
   },
-  "homepage": "https://github.com/amaannodejs/training#readme"
+  "homepage": "https://github.com/amaannodejs/test#readme",
+  "dependencies": {
+    "@faker-js/faker": "^7.3.0",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.0",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "express-session": "^1.17.3",
+    "express-validator": "^6.14.2",
+    "mongoose": "^6.4.0",
+    "nodemon": "^2.0.18"
+  }
 }
