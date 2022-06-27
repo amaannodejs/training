@@ -4,18 +4,19 @@ require('dotenv').config()
 const uri= process.env.URI,
     express=require('express'),
     mongoose=require('mongoose'),
-    userRoutes=require('../routes/users')
-    app=express()
+    userRoutes=require('../routes/users'),
+    app=express(),
+    path=require('path')
+    
+    
+    
 
 
 
-
-
-
-
-
+    app.use(express.static(path.join(__dirname, '..','public')));
     app.use(bodyParser.json());
     app.use("/user",userRoutes)
+    
     
 
 exports.connect=async()=>{
