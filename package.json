@@ -1,0 +1,22 @@
+{
+  "name": "project5",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://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@github.com/amaannodejs/training.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amaannodejs/training/issues"
+  },
+  "homepage": "https://github.com/amaannodejs/training#readme",
+  "dependencies": {
+    "jsdom": "^20.0.0"
+  }
+}
