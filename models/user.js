@@ -40,98 +40,105 @@ const User = sequelize.define('User', {
 
 
 
-User.addUser = function (name, username, password, confirmPassword, email, cb) {
-    User.findOne({
-        where: {
-            username: username
-        }
-    }).then(user => {
+User.addUser = async function (name, username, password, confirmPassword, email, cb) {
+    try {
+        const user = await User.findOne({
+            where: {
+                username: username
+            }
+        })
         if (user) {
             return cb(null, new Error("Username already exist"))
         }
-        bcrypt.hash(password, 12).then(hash => {
-            User.create({
-                name: name,
-                username: username,
-                password: hash,
-                email: email
-            }).then(user => {
-                if (!user) {
-                    return cb(null, new Error("DB error"))
-                }
-                return cb(user)
-            }).catch(console.error)
-        }).catch(console.error)
-    }).catch(console.error)
+        const hash = await bcrypt.hash(password, 12)
+        const newUser = await User.create({
+            name: name,
+            username: username,
+            password: hash,
+            email: email
+        })
+        if (!newUser) {
+            return cb(null, new Error("DB error"))
+        }
+        return cb(newUser)
+
+    } catch (err) {
+        console.log(err)
+    }
+
 }
 
-User.login = function (username, password, cb) {
-    User.findOne({
-        where: {
-            username: username
-        }
-    }).then(user => {
+User.login = async function (username, password, cb) {
+    try {
+        const user = await User.findOne({
+            where: {
+                username: username
+            }
+        })
         if (!user) {
             return cb(null, new Error("Username not found!"))
         }
-        bcrypt.compare(password, user.password).then(result => {
-            if (!result) {
-                return cb(null, new Error("Username & password combination is invaild!"))
-            }
-            return cb(user)
+        const result = await bcrypt.compare(password, user.password)
+        if (!result) {
+            return cb(null, new Error("Username & password combination is invaild!"))
+        }
+        return cb(user)
+    } catch (err) {
+        console.log(err)
+    }
 
-        }).catch(console.error)
-    }).catch(console.error)
 }
 
-User.resetPassword = function (user, isTokenVerified, oldPassword, newPassword, confirmPassword, cb) {
+User.resetPassword = async function (user, isTokenVerified, oldPassword, newPassword, confirmPassword, cb) {
 
-
-    bcrypt.compare(user.password, oldPassword).then(result => {
-
+    try {
+        const result = await bcrypt.compare(user.password, oldPassword)
         if ((!result && !isTokenVerified) || (newPassword != confirmPassword)) {
 
             return cb(null, new Error('user verification failed'))
         }
-        bcrypt.hash(newPassword, 12).then(hash => {
+        const hash = await bcrypt.hash(newPassword, 12)
+        if (!hash) {
+            return cb(null, new Error('DB error'))
+        }
+        user.password = hash
+        const savedUser = await user.save()
+        if (!savedUser) {
+            return cb(null, new Error("DB error"))
+        }
+        return cb(true)
+    } catch (err) {
+        console.log(err)
+    }
 
-            if (!hash) {
-                return cb(null, new Error('DB error'))
-            }
-            user.password = hash
-            user.save().then(savedUser => {
-                if (!savedUser) {
-                    return cb(null, new Error("DB error"))
-                }
-                return cb(true)
-            }).catch(console.error)
-
-        }).catch(console.error)
-    }).catch(console.error)
 }
 
 
-User.updateProfileImage = function (user, imagePath, cb) {
+User.updateProfileImage = async function (user, imagePath, cb) {
+    try {
+        if (user.profileImage) {
 
-    if (user.profileImage) {
+            fs.rm(user.profileImage, (err, status) => {
+                if (err || !status) {
+                    console.log(err)
+                }
+            })
 
-        fs.rm(user.profileImage, (err, status) => {
-            if (err || !status) {
-                console.log(err)
-            }
-        })
-
-    }
-
-    user.profileImage = imagePath
-
-    user.save().then(user => {
-        if (!user) {
+        }
+        user.profileImage = imagePath
+        const savedUser = await user.save()
+        if (!savedUser) {
             return cb(null, new Error('DB error'))
         }
 
         return cb(true)
-    }).catch(console.error)
+
+    } catch (err) {
+        console.log(err)
+    }
+
+
+
 
 }
 

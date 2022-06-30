@@ -22,12 +22,13 @@ const Token = sequelize.define('fTokens', {
 })
 
 
-Token.getToken = function (username, cb) {
-    User.findOne({
-        where: {
-            username: username
-        }
-    }).then(user => {
+Token.getToken = async function (username, cb) {
+    try {
+        const user = await User.findOne({
+            where: {
+                username: username
+            }
+        })
         if (!user) {
             return cb(null, null, new Error('no user found with this username'))
         }
@@ -37,58 +38,64 @@ Token.getToken = function (username, cb) {
             "reason": "password-reset"
         }, jwtkey, {
             expiresIn: 600000
-        }, (err, token) => {
+        }, async (err, token) => {
             if (err) {
                 return cb(null, null, new Error("internal error"))
             }
-
-            Token.destroy({
+            const deleted = await Token.destroy({
                 where: {
                     UserUid: user.uid
                 }
-            }).then(deleted => {
-                Token.create({
-                    UserUid: user.uid,
-                    token: token
-                }).then(newtoken => {
-                    if (!newtoken) {
-                        return cb(null, null, new Error("DB error"))
-                    }
-                    return cb(token, user)
-                }).catch(console.error)
-            }).catch(console.error)
+            })
+            const newToken = await Token.create({
+                UserUid: user.uid,
+                token: token
+            })
+            if (!newToken) {
+                return cb(null, null, new Error("DB error"))
+            }
+            return cb(token, user)
+
         })
-    }).catch(console.error)
+    } catch (err) {
+        console.log(err)
+    }
+
 
 }
 
-Token.veriyToken = function (token, cb) {
-    Token.destroy({
-        where: {
-            token: token
-        }
-    }).then(deleted => {
+Token.veriyToken = async function (token, cb) {
+    try {
+        const deleted = await Token.destroy({
+            where: {
+                token: token
+            }
+        })
         if (deleted == 0) {
             return cb(null, new Error('Token verification failed'))
         }
-        jwt.verify(token, jwtkey, (err, decode) => {
+        jwt.verify(token, jwtkey, async (err, decode) => {
             if (err) {
                 return cb(null, 'Token verification failed')
             }
-            User.findOne({
+            const user = await User.findOne({
                 where: {
                     username: decode.username
                 }
-            }).then(user => {
-                if (!user || decode.username != user.username) {
+            })
+            if (!user || decode.username != user.username) {
 
-                    return cb(null, new Error('Token verification failed'))
-                }
+                return cb(null, new Error('Token verification failed'))
+            }
 
-                return cb(user)
-            }).catch(console.error)
+            return cb(user)
         })
-    }).catch(console.error)
+
+    } catch (err) {
+        console.log(err)
+    }
+
+
 }
 
 

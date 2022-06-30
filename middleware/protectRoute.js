@@ -2,8 +2,8 @@ const User = require('../models/user'),
     jwt = require('jsonwebtoken'),
     jwtkey = process.env.jwtkey
 
-const protectRoute = (req, res, next) => {
-
+const protectRoute = async (req, res, next) => {
+    console.log('heresaddddasdasdas')
     if (!req.headers.accesstoken) {
         console.log('no acces token found in header')
         return res.status(500).json({
@@ -12,18 +12,19 @@ const protectRoute = (req, res, next) => {
     }
     const token = req.headers.accesstoken
 
-    jwt.verify(token, jwtkey, (err, decode) => {
+    jwt.verify(token, jwtkey, async (err, decode) => {
         if (err) {
             return res.status(500).json({
                 "error": 'auth fail'
             })
         }
         console.log(decode)
-        User.findOne({
-            where: {
-                username: decode.data.username
-            }
-        }).then(user => {
+        try {
+            const user = await User.findOne({
+                where: {
+                    username: decode.data.username
+                }
+            })
             if (!user) {
                 return res.status(500).json({
                     "error": 'DB error'
@@ -31,7 +32,10 @@ const protectRoute = (req, res, next) => {
             }
             req.user = user
             return next()
-        }).catch(console.error)
+        } catch (err) {
+            console.log(err)
+        }
+
 
     });
 

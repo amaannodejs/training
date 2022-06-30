@@ -11,19 +11,24 @@ const nodemailer = require("nodemailer"),
       pass: emailPassword,
     },
   });
-exports.sendMail = (email, subject, body, cb) => {
-
-  transporter.sendMail({
-    from: '"Excellence Technologies" <amaannodejs@outlook.com>',
-    to: email,
-    subject: subject,
-    text: "",
-    html: body,
-  }).then(info => {
+exports.sendMail = async (email, subject, body, cb) => {
+  try {
+    console.log(body)
+    const info = await transporter.sendMail({
+      from: '"Excellence Technologies" <amaannodejs@outlook.com>',
+      to: email,
+      subject: subject,
+      text: "",
+      html: body,
+    })
     if (!info) {
-      cb(null, 'mail not sent')
+      return cb(null, 'mail not sent')
     }
-    cb('email send successfully')
-  }).catch(err => console.log(err))
+    return cb('email send successfully')
+
+  } catch (err) {
+    console.log(err)
+  }
+
 
 }

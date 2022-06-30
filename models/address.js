@@ -36,72 +36,85 @@ const userAddress = sequelize.define('UserAddress', {
     tableName: 'userAddresses'
 })
 
-userAddress.addAddress = function (user, address, city, state, pincode, phoneno, cb) {
+userAddress.addAddress = async function (user, address, city, state, pincode, phoneno, cb) {
 
-    userAddress.create({
-        UserUid: user.uid,
-        address: address,
-        city: city,
-        state: state,
-        pincode: pincode,
-        phoneno: phoneno
-    }).then(address => {
-        if (!address) {
+    try {
+        const newAddress = await userAddress.create({
+            UserUid: user.uid,
+            address: address,
+            city: city,
+            state: state,
+            pincode: pincode,
+            phoneno: phoneno
+        })
+        if (!newAddress) {
             return cb(null, new Error("DB error"))
         }
 
-        return cb(address)
-    }).catch(console.error)
+        return cb(newAddress)
+    } catch (err) {
+        console.log(err)
+    }
+
 
 }
-userAddress.updateAddress = function (id, newAddress, city, state, pincode, phoneno, cb) {
-    userAddress.findOne({
-        where: {
-            aid: id
+userAddress.updateAddress = async function (id, newAddress, city, state, pincode, phoneno, cb) {
+    try {
+        const address = await userAddress.findOne({
+            where: {
+                aid: id
+            }
+        })
+        if (!address) {
+            return cb(null, new Error("DB error"))
         }
-    }).then(address => {
-
         address.address = newAddress,
             address.city = city,
             address.state = state,
             address.pincode = pincode,
             address.phoneno = phoneno
-        address.save().then(address => {
+        await address.save()
 
-            if (!address) {
-                return cb(null, new Error("DB error"))
-            }
-            return cb(address)
-        }).catch(console.error)
-    }).catch(console.error)
+        return cb(address)
+    } catch (err) {
+        console.log(err)
+    }
+
 }
 
 
-userAddress.getAddresses = function (uid, pageNo, cb) {
-    userAddress.findAndCountAll({
-        where: {
-            UserUid: uid
-        },
-        limit: 10,
-        offset: (pageNo * 10) - 10
-    }).then(addresses => {
+userAddress.getAddresses = async function (uid, pageNo, cb) {
+    try {
+        const addresses = await userAddress.findAndCountAll({
+            where: {
+                UserUid: uid
+            },
+            limit: 10,
+            offset: (pageNo * 10) - 10
+        })
         if (addresses.length == 0) {
             return cb(null, new Error("No addresses found"))
         }
         return cb(addresses)
-    }).catch(console.error)
+
+    } catch (err) {
+        console.log(err)
+    }
+
 }
-userAddress.deleteByIds = function (userId, aids, cb) {
-
-    userAddress.destroy({
-        where: {
-            aid: aids,
-            UserUid: userId
-        }
-    }).then(deleted => {
-
+userAddress.deleteByIds = async function (userId, aids, cb) {
+    try {
+        const delted = await userAddress.destroy({
+            where: {
+                aid: aids,
+                UserUid: userId
+            }
+        })
         return cb(true)
-    }).catch(console.error)
+    } catch (err) {
+        console.log(err)
+    }
+
 }
 
 

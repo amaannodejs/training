@@ -40,10 +40,9 @@ exports.loginController = (req, res) => {
         password
     } = req.body
     User.login(username, password, (user, err) => {
-
         if (err) {
             return res.status(500).json({
-                "error": err
+                "error": String(err)
             })
         }
         const userData = {
@@ -72,7 +71,7 @@ exports.addressController = (req, res) => {
     Address.addAddress(req.user, address, city, state, pincode, phoneno, (address, err) => {
         if (err || !address) {
             return res.status(500).json({
-                "error": err
+                "error": String(err)
             })
         }
         return res.sendStatus(200)
