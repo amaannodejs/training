@@ -1,0 +1,5 @@
+exports.express = require('express')
+exports.userController = require('../controllers/user')
+exports.protectRoute = require('../middleware/protectRoute')
+exports.validator = require('../middleware/validation')
+exports.fileHandler = require('../services/fileHandle')
