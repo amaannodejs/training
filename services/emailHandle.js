@@ -1,4 +1,6 @@
-const nodemailer = require("nodemailer"),
+const {
+  nodemailer
+} = require("./index"),
   emailUsername = process.env.emailUsername,
   emailPassword = process.env.emailPassword,
 
@@ -12,23 +14,28 @@ const nodemailer = require("nodemailer"),
     },
   });
 exports.sendMail = async (email, subject, body, cb) => {
-  try {
-    console.log(body)
-    const info = await transporter.sendMail({
-      from: '"Excellence Technologies" <amaannodejs@outlook.com>',
-      to: email,
-      subject: subject,
-      text: "",
-      html: body,
-    })
-    if (!info) {
-      return cb(null, 'mail not sent')
-    }
-    return cb('email send successfully')
+  return new Promise(async (resolve, reject) => {
+    try {
+      console.log(body)
+      const info = await transporter.sendMail({
+        from: '"Excellence Technologies" <amaannodejs@outlook.com>',
+        to: email,
+        subject: subject,
+        text: "",
+        html: body,
+      })
+      if (!info) {
+        reject(new Error('mail not sent'))
 
-  } catch (err) {
-    console.log(err)
-  }
+      }
+      resolve(true)
+
+
+    } catch (err) {
+      console.log(err)
+    }
+  })
+
 
 
 }
