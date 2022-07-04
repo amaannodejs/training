@@ -1,0 +1,21 @@
+{
+  "name": "project7",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js",
+    "start-server": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://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@github.com/amaannodejs/training.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amaannodejs/training/issues"
+  },
+  "homepage": "https://github.com/amaannodejs/training#readme"
+}

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Socket.IO chat</title>
+    <style>
+        body {
+            margin: 0;
+            padding-bottom: 3rem;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        #form {
+            background: rgba(0, 0, 0, 0.15);
+            padding: 0.25rem;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            display: flex;
+            height: 3rem;
+            box-sizing: border-box;
+            backdrop-filter: blur(10px);
+        }
+
+        #input {
+            border: none;
+            padding: 0 1rem;
+            flex-grow: 1;
+            border-radius: 2rem;
+            margin: 0.25rem;
+        }
+
+        #input:focus {
+            outline: none;
+        }
+
+        #btn {
+            background: #333;
+            border: none;
+            padding: 0 1rem;
+            margin: 0.25rem;
+            border-radius: 3px;
+            outline: none;
+            color: #fff;
+        }
+
+        #messages {
+            list-style-type: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #messages>li {
+            padding: 0.5rem 1rem;
+        }
+
+        #messages>li:nth-child(odd) {
+            background: #efefef;
+        }
+
+        #chatbox {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="getusername">
+        <input type="text" id="username">
+        <button onclick="getUsername()">Submit</button>
+    </div>
+    <div id="chatbox">
+        <ul id="messages"></ul>
+        <div id="form" onsubmit="sendMsg()">
+            <input id="input" autocomplete="off" /><button onclick="sendMsg()">Send</button>
+        </div>
+    </div>
+
+</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js"
+    integrity="sha512-9mpsATI0KClwt+xVZfbcf2lJ8IFBAwsubJ6mI3rtULwyM3fBmQFzj0It4tGqxLOGQwGfJdk/G+fANnxfq9/cew=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+    const socket = io();
+    const usernameDiv = document.querySelector('#getusername'),
+        usernameTxt = document.querySelector('#username'),
+        chatbox = document.querySelector('#chatbox')
+       
+    let username = ""
+
+    function getUsername() {
+        user = usernameTxt.value
+        if(user){
+           socket.emit('getUsername',JSON.stringify({username:user}))
+        }
+        
+
+    }
+
+    function sendMsg() {
+        const input = document.querySelector('#input')
+        
+        console.log('trigget')
+        console.log(input.value)
+        if (input) {
+            msg = {
+                username: username,
+                msg: input.value
+            }
+            socket.emit('chat-msg', JSON.stringify(msg));
+            input.value = '';
+            addMsg("Me",msg.msg)
+        }
+  
+    }
+    function addMsg(username,msg){
+        const ul=document.querySelector('#messages')
+        const li=document.createElement('li')
+        li.textContent=username+' : '+msg
+        ul.appendChild(li)
+    }
+    //global listeners
+    socket.on('globalSync',data=>{
+            console.log(data)
+        })
+    socket.on('userNotSet',data=>{
+            console.log('trigger')
+            alert('username already exist')
+            username=""
+        })
+    socket.on('userSet',data=>{
+            data=JSON.parse(data)
+            console.log(data['username'])
+            username=data['username']
+            usernameDiv.style.display = 'none'
+            chatbox.style.display = 'block'
+       
+        })
+     socket.on('chat-msg',data=>{
+        data=JSON.parse(data)
+        addMsg(data['username'],data['msg'])
+    })
+</script>
+
+</html>
