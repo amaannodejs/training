@@ -20,11 +20,7 @@ const protectRoute = async (req, res, next) => {
         }
         console.log(decode)
         try {
-            const user = await User.findOne({
-                where: {
-                    username: decode.data.username
-                }
-            })
+            const user = await User.findOne("username='"+decode.data.username+"'")
             if (!user) {
                 return res.status(500).json({
                     "error": 'DB error'

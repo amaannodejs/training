@@ -27,6 +27,9 @@ exports.registerController = async (req, res) => {
 
     } catch (err) {
         console.log(err)
+        return res.status(500).json({
+            "err": String(err)
+        })
     }
 
 
@@ -52,6 +55,9 @@ exports.loginController = async (req, res) => {
         })
     } catch (err) {
         console.log(err)
+        return res.status(500).json({
+            "err": String(err)
+        })
     }
 
 }
@@ -70,6 +76,9 @@ exports.addressController = async (req, res) => {
 
     } catch (err) {
         console.log(err)
+        return res.status(500).json({
+            "err": String(err)
+        })
     }
 
 
@@ -82,6 +91,9 @@ exports.listController = async (req, res) => {
         return res.json(addresses)
     } catch (err) {
         console.log(err)
+        return res.status(500).json({
+            "err": String(err)
+        })
     }
 
 
@@ -93,6 +105,9 @@ exports.deleteAddressController = async (req, res) => {
         return res.sendStatus(200)
     } catch (err) {
         console.log(err)
+        return res.status(500).json({
+            "err": String(err)
+        })
     }
 
 
@@ -113,6 +128,9 @@ exports.forgotPasswordController = async (req, res) => {
 
     } catch (err) {
         console.log(err)
+        return res.status(500).json({
+            "err": String(err)
+        })
     }
 
 
@@ -132,6 +150,9 @@ exports.verifyResetPasswordController = async (req, res) => {
 
     } catch (err) {
         console.log(err)
+        return res.status(500).json({
+            "err": String(err)
+        })
     }
 
 
@@ -145,6 +166,9 @@ exports.uploadProfileImage = async (req, res) => {
         return res.sendStatus(200)
     } catch (err) {
         console.log(err)
+        return res.status(500).json({
+            "err": String(err)
+        })
     }
 
 

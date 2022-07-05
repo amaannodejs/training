@@ -1,35 +1,73 @@
 const User = require('./user')
 
 const {
-    sequelize,
-    Sequelize,
+    db,
     jwt,
     jwtkey
 } = require('./index')
-const Token = sequelize.define('fTokens', {
-    tid: {
-        type: Sequelize.INTEGER,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    token: {
-        type: Sequelize.STRING,
-        allowNull: false
+const {
+    response
+} = require('express')
+const Token = {}
+
+Token.sync = async function () {
+    let result = await db.query('show tables')
+    result = result.map(ele => ele.Tables_in_work2)
+    if (!result.includes('fTokens')) {
+        newquery = `CREATE TABLE fTokens(
+            tid int NOT NULL AUTO_INCREMENT,
+            token VARCHAR(255) NOT NULL,
+            uid int NOT NULL,
+            PRIMARY KEY (tid),
+            FOREIGN KEY (uid) REFERENCES users(uid)
+        )`
+        return await db.query(newquery)
     }
 
-}, {
-    tableName: 'fTokens'
-})
+}
+Token.sync()
+
+Token.destroy = async (cond) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            newquery = "DELETE FROM fTokens WHERE " + cond
+            resolve(await db.query(newquery))
+        } catch (err) {
+            reject(err)
+        }
+
+    })
+}
+Token.create = async (uid, token) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            newquery = "INSERT INTO fTokens (uid,token) VALUES('" + uid + "','" + token + "')"
+            resolve(await db.query(newquery))
+
+        } catch (err) {
+            reject(err)
+        }
+    })
+}
+Token.destroy = async (cond) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            newquery = "DELETE FROM fTokens WHERE " + cond
+            result = await db.query("DELETE FROM fTokens WHERE " + cond)
+            resolve(result.affectedRows)
+
+        } catch (err) {
+            reject(err)
+        }
+    })
+
+}
 
 
 Token.getToken = async function (username) {
     return new Promise(async (resolve, reject) => {
         try {
-            const user = await User.findOne({
-                where: {
-                    username: username
-                }
-            })
+            const user = await User.findOne("username='" + username + "'")
             if (!user) {
                 const err = new Error('no user found with this username')
                 err.status = 500
@@ -48,16 +86,9 @@ Token.getToken = async function (username) {
                     return reject(err)
 
                 }
-                const deleted = await Token.destroy({
-                    where: {
-                        UserUid: user.uid
-                    }
-                })
-                const newToken = await Token.create({
-                    UserUid: user.uid,
-                    token: token
-                })
-                if (!newToken) {
+                await Token.destroy("uid=" + user.uid)
+                result = await Token.create(user.uid, token)
+                if (!result) {
                     const err = new Error("DB error")
                     err.status = 500
                     return reject(err)
@@ -70,7 +101,7 @@ Token.getToken = async function (username) {
 
             })
         } catch (err) {
-            console.log(err)
+            reject(err)
         }
     })
 
@@ -81,12 +112,8 @@ Token.getToken = async function (username) {
 Token.veriyToken = async function (token) {
     return new Promise(async (resolve, reject) => {
         try {
-            const deleted = await Token.destroy({
-                where: {
-                    token: token
-                }
-            })
-            if (deleted == 0) {
+            const result = await Token.destroy("token='" + token + "'")
+            if (result == 0) {
                 return reject(new Error('Token verification failed'))
 
             }
@@ -95,11 +122,7 @@ Token.veriyToken = async function (token) {
                     return reject(new Error('Token verification failed'))
 
                 }
-                const user = await User.findOne({
-                    where: {
-                        username: decode.username
-                    }
-                })
+                const user = await User.findOne("username='" + decode.username + "'")
                 if (!user || decode.username != user.username) {
                     return reject(new Error('Token verification failed'))
 
@@ -109,7 +132,7 @@ Token.veriyToken = async function (token) {
             })
 
         } catch (err) {
-            console.log(err)
+            reject(err)
         }
     })
 
@@ -121,7 +144,7 @@ Token.veriyToken = async function (token) {
 
 
 
-User.hasOne(Token, {
-    onDelete: "CASCADE"
-})
+// User.hasOne(Token, {
+//     onDelete: "CASCADE"
+// })
 module.exports = Token
