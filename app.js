@@ -1,12 +1,7 @@
 require('dotenv').config()
-const Sequelize = require('sequelize'),
-  express = require('express'),
+const express = require('express'),
   path = require('path'),
   bodyParser = require('body-parser'),
-  // sequelize = new Sequelize('work', 'root', '9868439196', {
-  //   host: 'localhost',
-  //   dialect: 'mysql'
-  // }),
   app = express(),
 
   userRoutes = require('./routes/users')
@@ -53,7 +48,6 @@ const Address=require('./models/address')
 const connect = async () => {
   try {
 
-    // await sequelize.authenticate()
     await app.listen('80')
     console.log('80isUP')
 
@@ -66,5 +60,5 @@ const connect = async () => {
 }
 
 
-//sequelize.sync()
+
 connect()

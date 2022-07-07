@@ -5,24 +5,18 @@ const {
     jwt,
     jwtkey
 } = require('./index')
-const {
-    response
-} = require('express')
 const Token = {}
 
 Token.sync = async function () {
-    let result = await db.query('show tables')
-    result = result.map(ele => ele.Tables_in_work2)
-    if (!result.includes('fTokens')) {
-        newquery = `CREATE TABLE fTokens(
-            tid int NOT NULL AUTO_INCREMENT,
-            token VARCHAR(255) NOT NULL,
-            uid int NOT NULL,
-            PRIMARY KEY (tid),
-            FOREIGN KEY (uid) REFERENCES users(uid)
-        )`
-        return await db.query(newquery)
-    }
+    newquery = `CREATE TABLE IF NOT EXISTS fTokens(
+        tid int NOT NULL AUTO_INCREMENT,
+        token VARCHAR(255) NOT NULL,
+        uid int NOT NULL,
+        PRIMARY KEY (tid),
+        FOREIGN KEY (uid) REFERENCES users(uid)
+    )`
+    return await db.query(newquery)
+    
 
 }
 Token.sync()
@@ -30,7 +24,7 @@ Token.sync()
 Token.destroy = async (cond) => {
     return new Promise(async (resolve, reject) => {
         try {
-            newquery = "DELETE FROM fTokens WHERE " + cond
+            newquery = `DELETE FROM fTokens WHERE ${cond}`
             resolve(await db.query(newquery))
         } catch (err) {
             reject(err)
@@ -41,7 +35,8 @@ Token.destroy = async (cond) => {
 Token.create = async (uid, token) => {
     return new Promise(async (resolve, reject) => {
         try {
-            newquery = "INSERT INTO fTokens (uid,token) VALUES('" + uid + "','" + token + "')"
+            newquery = `INSERT INTO fTokens (uid,token) 
+            VALUES("${uid}","${token}")`
             resolve(await db.query(newquery))
 
         } catch (err) {
@@ -52,8 +47,8 @@ Token.create = async (uid, token) => {
 Token.destroy = async (cond) => {
     return new Promise(async (resolve, reject) => {
         try {
-            newquery = "DELETE FROM fTokens WHERE " + cond
-            result = await db.query("DELETE FROM fTokens WHERE " + cond)
+            newquery = `DELETE FROM fTokens WHERE ${cond}`
+            result = await db.query(newquery)
             resolve(result.affectedRows)
 
         } catch (err) {
@@ -67,7 +62,7 @@ Token.destroy = async (cond) => {
 Token.getToken = async function (username) {
     return new Promise(async (resolve, reject) => {
         try {
-            const user = await User.findOne("username='" + username + "'")
+            const user = await User.findOne(`username="${username}"`)
             if (!user) {
                 const err = new Error('no user found with this username')
                 err.status = 500
@@ -86,7 +81,7 @@ Token.getToken = async function (username) {
                     return reject(err)
 
                 }
-                await Token.destroy("uid=" + user.uid)
+                await Token.destroy(`uid="${user.uid}"`)
                 result = await Token.create(user.uid, token)
                 if (!result) {
                     const err = new Error("DB error")
@@ -112,7 +107,7 @@ Token.getToken = async function (username) {
 Token.veriyToken = async function (token) {
     return new Promise(async (resolve, reject) => {
         try {
-            const result = await Token.destroy("token='" + token + "'")
+            const result = await Token.destroy(`token="${token}"`)
             if (result == 0) {
                 return reject(new Error('Token verification failed'))
 
@@ -122,7 +117,7 @@ Token.veriyToken = async function (token) {
                     return reject(new Error('Token verification failed'))
 
                 }
-                const user = await User.findOne("username='" + decode.username + "'")
+                const user = await User.findOne(`username="${decode.username}"`)
                 if (!user || decode.username != user.username) {
                     return reject(new Error('Token verification failed'))
 
@@ -144,7 +139,5 @@ Token.veriyToken = async function (token) {
 
 
 
-// User.hasOne(Token, {
-//     onDelete: "CASCADE"
-// })
+
 module.exports = Token

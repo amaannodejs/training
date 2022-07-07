@@ -1,7 +1,4 @@
 const {
-    query
-} = require('express')
-const {
     profileImage
 } = require('../middleware/validation')
 const Address = require('./address')
@@ -18,30 +15,25 @@ const User = {}
 
 
 User.sync = async function () {
-    let result = await db.query('show tables')
+    newquery = `CREATE TABLE IF NOT EXISTS users(
+        uid int NOT NULL AUTO_INCREMENT,
+        name VARCHAR(30) NOT NULL,
+        username VARCHAR(30) NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        email VARCHAR(50) NOT NULL,
+        profileImage VARCHAR(255),
+        PRIMARY KEY (uid)
 
-    result = result.map(ele => ele.Tables_in_work2)
-    if (!result.includes('users')) {
-        newquery = `CREATE TABLE users(
-            uid int NOT NULL AUTO_INCREMENT,
-            name VARCHAR(30) NOT NULL,
-            username VARCHAR(30) NOT NULL,
-            password VARCHAR(255) NOT NULL,
-            email VARCHAR(50) NOT NULL,
-            profileImage VARCHAR(255),
-            PRIMARY KEY (uid)
-
-        )`
-        return await db.query(newquery)
-
-    }
+    )`
+    return await db.query(newquery)
+   
 }
 User.sync()
 User.findOne = async (cond) => {
     return new Promise(async (resolve, reject) => {
         try {
 
-            newquery = "SELECT * FROM users WHERE " + cond
+            newquery = `SELECT * FROM users WHERE ${cond}`
             user = await db.query(newquery)
             resolve(user[0])
         } catch (err) {
@@ -58,7 +50,8 @@ User.create = async (name, username, password, email, profileImage) => {
             if (!profileImage) {
                 profileImage = ""
             }
-            newquery = "INSERT INTO users (name, username, password, email, profileImage) VALUES('" + name + "','" + username + "','" + password + "','" + email + "','" + profileImage + "')"
+            newquery = `INSERT INTO users (name, username, password, email, profileImage)
+            VALUES("${name}","${username}","${password}","${email}","${profileImage}")`
             resolve(await db.query(newquery))
         } catch (err) {
             reject(err)
@@ -70,19 +63,19 @@ User.update = async (oldUser, name, username, password, email, profileImage) => 
     return new Promise(async (resolve, reject) => {
         try {
             if (name) {
-                await db.query("UPDATE users SET name='" + name + "' WHERE uid=" + oldUser.uid)
+                await db.query(`UPDATE users SET name="${name}" WHERE uid="${oldUser.uid}"`)
             }
             if (username) {
-                await db.query("UPDATE users SET username='" + username + "' WHERE uid=" + oldUser.uid)
+                await db.query(`UPDATE users SET username="${username}" WHERE uid="${oldUser.uid}"`)
             }
             if (password) {
-                await db.query("UPDATE users SET password='" + password + "' WHERE uid=" + oldUser.uid)
+                await db.query(`UPDATE users SET password="${password}" WHERE uid="${oldUser.uid}"`)
             }
             if (email) {
-                await db.query("UPDATE users SET email='" + email + "' WHERE uid=" + oldUser.uid)
+                await db.query(`UPDATE users SET email="${email}" WHERE uid="${oldUser.uid}"`)
             }
             if (profileImage) {
-                await db.query("UPDATE users SET profileImage='" + profileImage + "' WHERE uid=" + oldUser.uid)
+                await db.query(`UPDATE users SET profileImage="${profileImage}" WHERE uid="${oldUser.uid}`)
             }
             resolve(true)
         } catch (err) {
@@ -97,7 +90,7 @@ User.update = async (oldUser, name, username, password, email, profileImage) => 
 User.addUser = async function (name, username, password, confirmPassword, email) {
     return new Promise(async (resolve, reject) => {
         try {
-            const user = await User.findOne("username='" + username + "'")
+            const user = await User.findOne(`username="${username}"`)
             if (user.length > 0) {
                 const err = new Error("Username already exist")
                 err.status = 500
@@ -126,7 +119,7 @@ User.addUser = async function (name, username, password, confirmPassword, email)
 User.login = async function (username, password) {
     return new Promise(async (resolve, reject) => {
         try {
-            const user = await User.findOne("username='" + username + "'")
+            const user = await User.findOne(`username="${username}"`)
             if (!user) {
                 const err = new Error("Username not found!")
                 err.status = 500
@@ -202,11 +195,6 @@ User.updateProfileImage = async function (user, imagePath) {
             reject(err)
         }
     })
-
-
-
-
-
 }
 
 
